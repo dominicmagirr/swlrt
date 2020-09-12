@@ -1,0 +1,18 @@
+Package: swlrt
+Title: Stratified weighted log-rank tests
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Dominic",
+           family = "Magirr",
+           role = c("aut", "cre"),
+           email = "dominic.magirr@novartis.com",
+           comment = c(ORCID = "0000-0002-3959-7057"))
+Description: Two simple functions for doing a weighted log-rank test or a stratified weighted log-rank test.
+License: MIT
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    dplyr,
+    purrr,
+    survival
+RoxygenNote: 6.1.1
