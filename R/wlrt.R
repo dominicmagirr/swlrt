@@ -47,8 +47,9 @@ wlrt <- function(df,
   else if (wlr == "fh"){
     if (is.null(rho) || is.null(gamma)) stop("must specify rho and gamma")
     if (rho < 0 || gamma < 0) stop("rho and gamma must be non-negative")
-    ### Fleming-Harrington (0,1) test weights
-    w <- 1 - c(1, s_pool[-length(s_pool)])
+
+    w <- c(1, s_pool[-length(s_pool)]) ^ rho * (1 - c(1, s_pool[-length(s_pool)])) ^ gamma
+
   }
   else{
     if (is.null(t_star) && is.null(s_star)) stop("must specify either t_star or s_star")
