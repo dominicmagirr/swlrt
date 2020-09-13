@@ -61,7 +61,7 @@ wlrt <- function(df,
     }
     else {
       w <- pmin(1 / c(1, s_pool[-length(s_pool)]),
-                s_star)
+                1 / s_star)
     }
   }
 
