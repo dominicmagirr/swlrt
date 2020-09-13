@@ -26,11 +26,15 @@ wlrt <- function(df,
                     time_colname,
                     event_colname)))) stop("trt_colname, time_colname and event_colname must all be character strings")
 
-  if (wlr %in% c("lr", "fh", "mw")) stop("wlr must be one of: 'lr', 'fh', 'mw'")
+  if (is.na(any(df[,c(trt_colname,
+                      time_colname,
+                      event_colname)]))) stop("NA's in data set. wlrt doesn't have a default for missing data.")
+
+  if (!(wlr %in% c("lr", "fh", "mw"))) stop("wlr must be one of: 'lr', 'fh', 'mw'")
 
   #### get summary
-  s_sum <- summary(suvival::survfit(survival::Surv(eval(as.name(time_colname)),
-                                                   eval(as.name(event_colname))) ~ 1,
+  s_sum <- summary(survival::survfit(survival::Surv(eval(as.name(time_colname)),
+                                                    eval(as.name(event_colname))) ~ 1,
                                     data= df))
 
   ### get survival probabilities for the pooled data
