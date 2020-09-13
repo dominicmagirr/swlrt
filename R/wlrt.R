@@ -26,7 +26,7 @@ wlrt <- function(df,
                     time_colname,
                     event_colname)))) stop("trt_colname, time_colname and event_colname must all be character strings")
 
-  if (is.na(any(df[,c(trt_colname,
+  if (any(is.na(df[,c(trt_colname,
                       time_colname,
                       event_colname)]))) stop("NA's in data set. wlrt doesn't have a default for missing data.")
 
