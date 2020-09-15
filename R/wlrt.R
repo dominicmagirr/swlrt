@@ -56,8 +56,16 @@ wlrt <- function(df,
     if (!is.null(t_star) && !is.null(s_star)) stop("must specify either t_star or s_star (not both)")
     ### modest weights
     if (!is.null(t_star)){
-      w <- pmin(1 / c(1, s_pool[-length(s_pool)]),
-                1 / s_pool[max(which(s_sum$time < t_star))])
+
+      if(any(s_sum$time < t_star)){
+
+        w <- pmin(1 / c(1, s_pool[-length(s_pool)]),
+                  1 / s_pool[max(which(s_sum$time < t_star))])
+      }
+      else {
+        w <- rep(1, length(s_pool))
+      }
+
     }
     else {
       w <- pmin(1 / c(1, s_pool[-length(s_pool)]),
