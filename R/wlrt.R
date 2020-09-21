@@ -35,7 +35,8 @@ wlrt <- function(df,
   #### get summary
   s_sum <- summary(survival::survfit(survival::Surv(eval(as.name(time_colname)),
                                                     eval(as.name(event_colname))) ~ 1,
-                                    data= df))
+                                    data= df,
+                                    timefix = FALSE))
 
   ### get survival probabilities for the pooled data
   s_pool <- s_sum$surv
