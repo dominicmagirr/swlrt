@@ -36,7 +36,7 @@ wlrt <- function(df,
   s_sum <- summary(survival::survfit(survival::Surv(eval(as.name(time_colname)),
                                                     eval(as.name(event_colname))) ~ 1,
                                     data= df,
-                                    timefix = FALSE))
+                                    timefix = TRUE))
 
   ### get survival probabilities for the pooled data
   s_pool <- s_sum$surv
@@ -89,6 +89,20 @@ wlrt <- function(df,
                r2 = sum(df2[[time_colname]] >= t),
                e1 = sum(df1[[time_colname]] == t & df1[[event_colname]] == 1),
                e2 = sum(df2[[time_colname]] == t & df2[[event_colname]] == 1))
+  }
+
+  #########################################
+  ## correct for floating-point imprecision
+  ## to match the timefix option in
+  ## survival::survfit
+
+  for (i in seq_along(df[[time_colname]])){
+
+    which_equal_i <- purrr::map_lgl(df[[time_colname]],
+                                    function(x,y) isTRUE(all.equal(x,y)),
+                                    y = df[[time_colname]][i])
+
+    df[[time_colname]][which_equal_i] <- df[[time_colname]][i]
   }
 
   #########################################
