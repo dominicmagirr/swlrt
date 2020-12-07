@@ -9,6 +9,7 @@
 #' @param t_star This is a parameter for the "mw"-test. Either \code{s_star} or \code{t_star} must be specified. The weights are defined as w(t) = 1 / max(S(t-), S(\code{t_star}), where S is the Kaplan-Meier estimate in the pooled data.
 #' @param rho Rho parameter in the "fh"-test. The weights are defined as w(t) = S(t-)^\code{rho} (1 - S(t-))^\code{gamma}, where S is the Kaplan-Meier estimate in the pooled data.
 #' @param gamma Gamma parameter in the "fh"-test. The weights are defined as w(t) = S(t-)^\code{rho} (1 - S(t-))^\code{gamma}, where S is the Kaplan-Meier estimate in the pooled data.
+#' @param timefix Logical. Option to correct for floating-point imprecision a la the survival package. Default is FALSE, which is appropriate for simulation studies where there is no tied data. For real application, it may be wise to switch to TRUE.
 #' @return A data frame. The outcome of the weighted log-rank test. There is a column \code{o_minus_e_trt} to indicate which treatment the "obs - exp" refers to.
 #' @export
 
@@ -20,7 +21,8 @@ wlrt <- function(df,
                  s_star = NULL,
                  t_star = NULL,
                  rho = NULL,
-                 gamma = NULL){
+                 gamma = NULL,
+                 timefix = FALSE){
 
   if(!all(is.character(c(trt_colname,
                     time_colname,
@@ -33,11 +35,21 @@ wlrt <- function(df,
   if (!(wlr %in% c("lr", "fh", "mw"))) stop("wlr must be one of: 'lr', 'fh', 'mw'")
 
   #### get summary
-  s_sum <- summary(survival::survfit(survival::Surv(eval(as.name(time_colname)),
-                                                    eval(as.name(event_colname))) ~ 1,
-                                    data= df,
-                                    timefix = TRUE))
+  if (!timefix){
 
+    s_sum <- summary(survival::survfit(survival::Surv(eval(as.name(time_colname)),
+                                                      eval(as.name(event_colname))) ~ 1,
+                                       data= df,
+                                       timefix = FALSE))
+  }
+  else {
+
+    s_sum <- summary(survival::survfit(survival::Surv(eval(as.name(time_colname)),
+                                                      eval(as.name(event_colname))) ~ 1,
+                                       data= df,
+                                       timefix = TRUE))
+
+  }
   ### get survival probabilities for the pooled data
   s_pool <- s_sum$surv
 
@@ -95,16 +107,16 @@ wlrt <- function(df,
   ## correct for floating-point imprecision
   ## to match the timefix option in
   ## survival::survfit
+  if(timefix){
+    for (i in seq_along(df[[time_colname]])){
 
-  for (i in seq_along(df[[time_colname]])){
+      which_equal_i <- purrr::map_lgl(df[[time_colname]],
+                                      function(x,y) isTRUE(all.equal(x,y)),
+                                      y = df[[time_colname]][i])
 
-    which_equal_i <- purrr::map_lgl(df[[time_colname]],
-                                    function(x,y) isTRUE(all.equal(x,y)),
-                                    y = df[[time_colname]][i])
-
-    df[[time_colname]][which_equal_i] <- df[[time_colname]][i]
+      df[[time_colname]][which_equal_i] <- df[[time_colname]][i]
+    }
   }
-
   #########################################
   rt <- purrr::map_df(unique(df[[time_colname]]),
                       rt_row,
